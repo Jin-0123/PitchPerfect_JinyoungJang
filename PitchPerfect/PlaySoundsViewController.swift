@@ -16,9 +16,6 @@ class PlaySoundsViewController: UIViewController {
     @IBOutlet weak var lowPitchButton: UIButton!
     @IBOutlet weak var echoButton: UIButton!
     @IBOutlet weak var reverbButton: UIButton!
-    @IBOutlet weak var stopButton: UIButton!
-    @IBOutlet weak var playPauseButton: UIButton!
-
 
     @IBOutlet weak var customPlay: UIButton!
     @IBOutlet weak var speedSlider: UISlider!
@@ -26,6 +23,12 @@ class PlaySoundsViewController: UIViewController {
     @IBOutlet weak var reverbSwitch: UISwitch!
     @IBOutlet weak var echoSwitch: UISwitch!
     
+    @IBOutlet weak var stopButton: UIButton!
+    @IBOutlet weak var playPauseButton: UIButton!
+    
+    @IBOutlet weak var startTimeLabel: UILabel!
+    @IBOutlet weak var endTimeLabel: UILabel!
+    @IBOutlet weak var progressView: UIProgressView!
     
     var recordedAudioURL: URL!
     var audioFile: AVAudioFile!

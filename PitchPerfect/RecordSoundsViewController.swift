@@ -9,13 +9,19 @@
 import UIKit
 import AVFoundation
 
+
 class RecordSoundsViewController: UIViewController, AVAudioRecorderDelegate {
     
     var audioRecorder: AVAudioRecorder!
+    var recordTimer: Timer!
+    var formatter: DateComponentsFormatter!
+
 
     @IBOutlet weak var recordingLable: UILabel!
     @IBOutlet weak var recordButton: UIButton!
     @IBOutlet weak var stopRecordingButton: UIButton!
+    
+    enum RecordingState { case recording, notRecording }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -24,15 +30,11 @@ class RecordSoundsViewController: UIViewController, AVAudioRecorderDelegate {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        print("viewWillAppear called")
     }
 
 
     @IBAction func recordAudio(_ sender: AnyObject) {
-        recordingLable.text = "Recording in Progressing"
-        stopRecordingButton.isEnabled = true
-        recordButton.isEnabled = false
-        
+    
         let dirPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as String
         let recordingName = "recordedVoic.wav"
         let pathArray = [dirPath, recordingName]
@@ -47,13 +49,25 @@ class RecordSoundsViewController: UIViewController, AVAudioRecorderDelegate {
         audioRecorder.prepareToRecord()
         audioRecorder.record()
         
-    }
-    @IBAction func stopRecording(_ sender: AnyObject) {
-        recordButton.isEnabled = true
-        stopRecordingButton.isEnabled = false
-        recordingLable.text = "Tap to Record"
+        recordConfigureUI(.recording)
         
+        // schedule a record timer for display record time
+        self.recordTimer = Timer(timeInterval: 1, target: self, selector: #selector(RecordSoundsViewController.updateRecordTime), userInfo: nil, repeats: true)
+        RunLoop.main.add(self.recordTimer!, forMode: RunLoopMode.defaultRunLoopMode)
+
+    }
+    
+    
+    
+    
+    @IBAction func stopRecording(_ sender: AnyObject) {
+        recordConfigureUI(.notRecording)
         audioRecorder.stop()
+        
+        if let recordTimer = recordTimer {
+            recordTimer.invalidate()
+        }
+        
         let audioSession = AVAudioSession.sharedInstance()
         try! audioSession.setActive(false)
     }
@@ -66,11 +80,35 @@ class RecordSoundsViewController: UIViewController, AVAudioRecorderDelegate {
         }
     }
     
+    
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "stopRecording" {
             let playSoundVC = segue.destination as! PlaySoundsViewController
             let recordedAudioURL = sender as! URL
             playSoundVC.recordedAudioURL = recordedAudioURL
+        }
+    }
+    
+
+    func updateRecordTime() {
+        let min = Int(audioRecorder.currentTime/60)
+        let sec = Int(audioRecorder.currentTime)%60
+        recordingLable.text = NSString(format: "%02d : %02d", min, sec) as String
+    }
+    
+    
+    func recordConfigureUI(_ recordState: RecordingState) {
+        switch(recordState) {
+        case .recording:
+            stopRecordingButton.isEnabled = true
+            recordButton.isEnabled = false
+            
+        case .notRecording:
+            recordButton.isEnabled = true
+            stopRecordingButton.isEnabled = false
+            recordingLable.text = "Tap to Record"
+            
+            
         }
     }
 }

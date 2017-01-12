@@ -34,7 +34,9 @@ extension PlaySoundsViewController: AVAudioPlayerDelegate {
     // MARK: Audio Functions
     
     func setupAudio() {
+        
         // initialize (recording) audio file
+        
         do {
             audioFile = try AVAudioFile(forReading: recordedAudioURL as URL)
         } catch {
@@ -45,13 +47,16 @@ extension PlaySoundsViewController: AVAudioPlayerDelegate {
     func playSound(rate: Float? = nil, pitch: Float? = nil, echo: Bool = false, reverb: Bool = false) {
         
         // initialize audio engine components
+        
         audioEngine = AVAudioEngine()
         
         // node for playing audio
+        
         audioPlayerNode = AVAudioPlayerNode()
         audioEngine.attach(audioPlayerNode)
         
         // node for adjusting rate/pitch
+        
         let changeRatePitchNode = AVAudioUnitTimePitch()
         if let pitch = pitch {
             changeRatePitchNode.pitch = pitch
@@ -62,17 +67,20 @@ extension PlaySoundsViewController: AVAudioPlayerDelegate {
         audioEngine.attach(changeRatePitchNode)
         
         // node for echo
+        
         let echoNode = AVAudioUnitDistortion()
         echoNode.loadFactoryPreset(.multiEcho1)
         audioEngine.attach(echoNode)
         
         // node for reverb
+        
         let reverbNode = AVAudioUnitReverb()
         reverbNode.loadFactoryPreset(.cathedral)
         reverbNode.wetDryMix = 50
         audioEngine.attach(reverbNode)
         
         // connect nodes
+        
         if echo == true && reverb == true {
             connectAudioNodes(audioPlayerNode, changeRatePitchNode, echoNode, reverbNode, audioEngine.outputNode)
         } else if echo == true {
@@ -84,6 +92,7 @@ extension PlaySoundsViewController: AVAudioPlayerDelegate {
         }
         
         // schedule to play and start the engine!
+        
         audioPlayerNode.stop()
         audioPlayerNode.scheduleFile(audioFile, at: nil) {
             
@@ -99,6 +108,7 @@ extension PlaySoundsViewController: AVAudioPlayerDelegate {
             }
             
             // schedule a stop timer for when audio finishes playing
+            
             self.stopTimer = Timer(timeInterval: delayInSeconds, target: self, selector: #selector(PlaySoundsViewController.stopAudio), userInfo: nil, repeats: false)
             RunLoop.main.add(self.stopTimer!, forMode: RunLoopMode.defaultRunLoopMode)
         }
@@ -111,6 +121,7 @@ extension PlaySoundsViewController: AVAudioPlayerDelegate {
         }
         
         // play the recording!
+        
         audioPlayerNode.play()
     }
     
@@ -151,6 +162,7 @@ extension PlaySoundsViewController: AVAudioPlayerDelegate {
     }
     
     // MARK: UI Functions
+    
     func configureUI(_ playState: PlayingState) {
         switch(playState) {
         case .playing:
