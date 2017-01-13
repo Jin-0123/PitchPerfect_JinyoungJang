@@ -230,6 +230,10 @@ extension PlaySoundsViewController: AVAudioPlayerDelegate {
             stopButton.isEnabled = false
             playPauseButton.setImage(UIImage(named:"Play.png"), for: UIControlState.normal)
             playPauseButton.isEnabled = false
+            speedSlider.value = 1
+            pitchSlider.value = 0
+            echoSwitch.isOn = false
+            reverbSwitch.isOn = false
             endPlayTimeLabel.text = "00 : 00"
             currentPlayTimeLabel.text = "00 : 00"
         }
