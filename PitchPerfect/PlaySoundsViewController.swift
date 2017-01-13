@@ -26,10 +26,6 @@ class PlaySoundsViewController: UIViewController {
     @IBOutlet weak var stopButton: UIButton!
     @IBOutlet weak var playPauseButton: UIButton!
     
-    @IBOutlet weak var startTimeLabel: UILabel!
-    @IBOutlet weak var endTimeLabel: UILabel!
-    @IBOutlet weak var progressView: UIProgressView!
-    
     var recordedAudioURL: URL!
     var audioFile: AVAudioFile!
     var audioEngine: AVAudioEngine!

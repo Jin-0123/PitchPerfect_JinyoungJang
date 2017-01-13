@@ -14,14 +14,10 @@ class RecordSoundsViewController: UIViewController, AVAudioRecorderDelegate {
     
     var audioRecorder: AVAudioRecorder!
     var recordTimer: Timer!
-    var formatter: DateComponentsFormatter!
 
-
-    @IBOutlet weak var recordingLable: UILabel!
+    @IBOutlet weak var recordingLabel: UILabel!
     @IBOutlet weak var recordButton: UIButton!
     @IBOutlet weak var stopRecordingButton: UIButton!
-    
-    enum RecordingState { case recording, notRecording }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -31,7 +27,14 @@ class RecordSoundsViewController: UIViewController, AVAudioRecorderDelegate {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
     }
+    
+    
+    // MARK: RecordingState
+    
+    enum RecordingState { case recording, notRecording }
+    
 
+    // MARK: Record Functions
 
     @IBAction func recordAudio(_ sender: AnyObject) {
     
@@ -44,6 +47,8 @@ class RecordSoundsViewController: UIViewController, AVAudioRecorderDelegate {
         try! session.setCategory(AVAudioSessionCategoryPlayAndRecord, with: .defaultToSpeaker)
         
         try! audioRecorder = AVAudioRecorder(url: filePath!, settings: [:])
+        
+        
         audioRecorder.delegate = self
         audioRecorder.isMeteringEnabled = true
         audioRecorder.prepareToRecord()
@@ -57,7 +62,12 @@ class RecordSoundsViewController: UIViewController, AVAudioRecorderDelegate {
 
     }
     
-    
+    // set time format and update label text
+    func updateRecordTime() {
+        let min = Int(audioRecorder.currentTime/60)
+        let sec = Int(audioRecorder.currentTime)%60
+        recordingLabel.text = NSString(format: "%02d : %02d", min, sec) as String
+    }
     
     
     @IBAction func stopRecording(_ sender: AnyObject) {
@@ -88,14 +98,9 @@ class RecordSoundsViewController: UIViewController, AVAudioRecorderDelegate {
             playSoundVC.recordedAudioURL = recordedAudioURL
         }
     }
-    
 
-    func updateRecordTime() {
-        let min = Int(audioRecorder.currentTime/60)
-        let sec = Int(audioRecorder.currentTime)%60
-        recordingLable.text = NSString(format: "%02d : %02d", min, sec) as String
-    }
     
+     // MARK: UI Functions
     
     func recordConfigureUI(_ recordState: RecordingState) {
         switch(recordState) {
@@ -106,7 +111,7 @@ class RecordSoundsViewController: UIViewController, AVAudioRecorderDelegate {
         case .notRecording:
             recordButton.isEnabled = true
             stopRecordingButton.isEnabled = false
-            recordingLable.text = "Tap to Record"
+            recordingLabel.text = "Tap to Record"
             
             
         }

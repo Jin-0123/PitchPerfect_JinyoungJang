@@ -27,9 +27,11 @@ extension PlaySoundsViewController: AVAudioPlayerDelegate {
         static let AudioEngineError = "Audio Engine Error"
     }
     
+    
     // MARK: PlayingState (raw values correspond to sender tags)
     
     enum PlayingState { case playing, pausing, notPlaying }
+    
     
     // MARK: Audio Functions
     
@@ -121,7 +123,6 @@ extension PlaySoundsViewController: AVAudioPlayerDelegate {
         }
         
         // play the recording!
-        
         audioPlayerNode.play()
     }
     
@@ -153,6 +154,7 @@ extension PlaySoundsViewController: AVAudioPlayerDelegate {
         configureUI(.pausing)
     }
     
+    
     // MARK: Connect List of Audio Nodes
     
     func connectAudioNodes(_ nodes: AVAudioNode...) {
@@ -160,6 +162,7 @@ extension PlaySoundsViewController: AVAudioPlayerDelegate {
             audioEngine.connect(nodes[x], to: nodes[x+1], format: audioFile.processingFormat)
         }
     }
+    
     
     // MARK: UI Functions
     
@@ -182,8 +185,6 @@ extension PlaySoundsViewController: AVAudioPlayerDelegate {
             stopButton.isEnabled = false
             playPauseButton.setImage(UIImage(named:"Play.png"), for: UIControlState.normal)
             playPauseButton.isEnabled = false
-            
-            
         }
     }
     
