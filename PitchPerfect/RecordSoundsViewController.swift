@@ -64,9 +64,7 @@ class RecordSoundsViewController: UIViewController, AVAudioRecorderDelegate {
     
     // set time format and update label text
     func updateRecordTime() {
-        let min = Int(audioRecorder.currentTime/60)
-        let sec = Int(audioRecorder.currentTime)%60
-        recordingLabel.text = NSString(format: "%02d : %02d", min, sec) as String
+        recordingLabel.text = NSString(format: "%02d : %02d", Int(audioRecorder.currentTime/60), Int(audioRecorder.currentTime)%60) as String
     }
     
     

@@ -25,12 +25,20 @@ class PlaySoundsViewController: UIViewController {
     
     @IBOutlet weak var stopButton: UIButton!
     @IBOutlet weak var playPauseButton: UIButton!
+    @IBOutlet weak var currentPlayTimeLabel: UILabel!
+    @IBOutlet weak var endPlayTimeLabel: UILabel!
     
     var recordedAudioURL: URL!
     var audioFile: AVAudioFile!
     var audioEngine: AVAudioEngine!
     var audioPlayerNode: AVAudioPlayerNode!
     var stopTimer: Timer!
+    var currentPlayTimer: Timer!
+
+    var isShowPlayButton = false
+    var endPlayTime: Double = 0
+    var currentPlayTime: Double = 0
+    var rateTemp: Float? = nil
     
     enum ButtonType: Int { case slow = 0, fast, highPitch, lowPitch, echo, reverb, custom}
     
@@ -51,11 +59,10 @@ class PlaySoundsViewController: UIViewController {
         case .custom:
             playSound(rate: speedSlider.value, pitch: pitchSlider.value, echo: echoSwitch.isOn, reverb: reverbSwitch.isOn)
         }
-        configureUI(.playing)
+        configureUI(.willPlaying)
     }
+        
     
-    
-    var isShowPlayButton = false
     @IBAction func playPauseButton(_ sender: UIButton) {
         if isShowPlayButton == true {
             playAudio()
@@ -80,6 +87,5 @@ class PlaySoundsViewController: UIViewController {
         super.viewWillAppear(animated)
         configureUI(.notPlaying)
     }
-
 
 }

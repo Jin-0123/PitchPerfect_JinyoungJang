@@ -27,10 +27,11 @@ extension PlaySoundsViewController: AVAudioPlayerDelegate {
         static let AudioEngineError = "Audio Engine Error"
     }
     
+
     
     // MARK: PlayingState (raw values correspond to sender tags)
     
-    enum PlayingState { case playing, pausing, notPlaying }
+    enum PlayingState { case willPlaying, playing, pausing, notPlaying }
     
     
     // MARK: Audio Functions
@@ -93,12 +94,25 @@ extension PlaySoundsViewController: AVAudioPlayerDelegate {
             connectAudioNodes(audioPlayerNode, changeRatePitchNode, audioEngine.outputNode)
         }
         
+        
+        // set endPlayTime
+        if let rate = rate {
+            self.endPlayTime = Double(self.audioFile.length) / Double(self.audioFile.processingFormat.sampleRate) / Double(rate)
+            
+            // set rateTemp for currentPlayTime
+            self.rateTemp = rate
+        } else {
+            self.endPlayTime = Double(self.audioFile.length) / Double(self.audioFile.processingFormat.sampleRate)
+        }
+        
+        
         // schedule to play and start the engine!
         
         audioPlayerNode.stop()
         audioPlayerNode.scheduleFile(audioFile, at: nil) {
             
             var delayInSeconds: Double = 0
+
             
             if let lastRenderTime = self.audioPlayerNode.lastRenderTime, let playerTime = self.audioPlayerNode.playerTime(forNodeTime: lastRenderTime) {
                 
@@ -108,9 +122,8 @@ extension PlaySoundsViewController: AVAudioPlayerDelegate {
                     delayInSeconds = Double(self.audioFile.length - playerTime.sampleTime) / Double(self.audioFile.processingFormat.sampleRate)
                 }
             }
-            
+
             // schedule a stop timer for when audio finishes playing
-            
             self.stopTimer = Timer(timeInterval: delayInSeconds, target: self, selector: #selector(PlaySoundsViewController.stopAudio), userInfo: nil, repeats: false)
             RunLoop.main.add(self.stopTimer!, forMode: RunLoopMode.defaultRunLoopMode)
         }
@@ -124,15 +137,42 @@ extension PlaySoundsViewController: AVAudioPlayerDelegate {
         
         // play the recording!
         audioPlayerNode.play()
+        setCurrentPlayTimer()
+        
     }
     
+    func setCurrentPlayTimer() {
+        self.currentPlayTimer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(PlaySoundsViewController.updateCurrentPlayTime), userInfo: nil, repeats: true)
+        
+    }
+    
+    
+    func updateCurrentPlayTime() {
+        if let lastRenderTime = self.audioPlayerNode.lastRenderTime, let playerTime = self.audioPlayerNode.playerTime(forNodeTime: lastRenderTime) {
+            if let rate = self.rateTemp {
+                currentPlayTime = Double(playerTime.sampleTime) / Double(self.audioFile.processingFormat.sampleRate) / Double(rate)
+            } else {
+                currentPlayTime = Double(playerTime.sampleTime) / Double(self.audioFile.processingFormat.sampleRate)
+            }
+        }
+        configureUI(.playing)
+    }
+    
+    
+    
     func stopAudio() {
+        if self.rateTemp != nil {
+            self.rateTemp = nil
+        }
         if let audioPlayerNode = audioPlayerNode {
             audioPlayerNode.stop()
         }
         if let stopTimer = stopTimer {
             stopTimer.invalidate()
         }
+        if let currentPlayTimer = currentPlayTimer {
+            currentPlayTimer.invalidate()
+       }
         configureUI(.notPlaying)
         if let audioEngine = audioEngine {
             audioEngine.stop()
@@ -144,8 +184,9 @@ extension PlaySoundsViewController: AVAudioPlayerDelegate {
         if let audioPlayerNode = audioPlayerNode {
             audioPlayerNode.play()
         }
-        configureUI(.playing)
+        configureUI(.willPlaying)
     }
+    
     
     func pauseAudio() {
         if let audioPlayerNode = audioPlayerNode {
@@ -168,11 +209,15 @@ extension PlaySoundsViewController: AVAudioPlayerDelegate {
     
     func configureUI(_ playState: PlayingState) {
         switch(playState) {
-        case .playing:
+        case .willPlaying:
             setPlayButtonsEnabled(false)
             stopButton.isEnabled = true
             playPauseButton.isEnabled = true
             playPauseButton.setImage(UIImage(named:"Play.png"), for: UIControlState.normal)
+            endPlayTimeLabel.text = NSString(format: "%02d : %02d", Int(endPlayTime/60), Int(endPlayTime)%60) as String
+
+        case .playing:
+            currentPlayTimeLabel.text = NSString(format: "%02d : %02d", Int(currentPlayTime/60), Int(currentPlayTime)%60) as String
 
         case .pausing:
             setPlayButtonsEnabled(false)
@@ -185,6 +230,8 @@ extension PlaySoundsViewController: AVAudioPlayerDelegate {
             stopButton.isEnabled = false
             playPauseButton.setImage(UIImage(named:"Play.png"), for: UIControlState.normal)
             playPauseButton.isEnabled = false
+            endPlayTimeLabel.text = "00 : 00"
+            currentPlayTimeLabel.text = "00 : 00"
         }
     }
     
